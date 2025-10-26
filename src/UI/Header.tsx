@@ -1,8 +1,6 @@
 import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
-  RiNotification3Line,
-  RiSettings3Line,
   RiUser3Line,
 } from "@remixicon/react";
 
