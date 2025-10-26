@@ -1,7 +1,11 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { RiDashboardLine, RiMessage2Line } from "@remixicon/react";
 
-export function Sidebar({ isSidebarCollapsed }) {
+interface SidebarProps {
+  isSidebarCollapsed: boolean;
+}
+
+export function Sidebar({ isSidebarCollapsed }:SidebarProps) {
   return (
     <div className="flex flex-1 pt-16">
       <aside
