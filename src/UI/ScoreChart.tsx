@@ -41,14 +41,24 @@ export function ScoreChart() {
     },
     responsive: [
       {
+        breakpoint: 1024,
+        options: {
+          chart: { width: 520, height: 320 },
+          legend: { position: "right" },
+        },
+      },
+      {
+        breakpoint: 768,
+        options: {
+          chart: { width: 420, height: 280 },
+          legend: { position: "bottom" },
+        },
+      },
+      {
         breakpoint: 480,
         options: {
-          chart: {
-            width: 200,
-          },
-          legend: {
-            position: "bottom",
-          },
+          chart: { width: 300, height: 220 },
+          legend: { position: "bottom" },
         },
       },
     ],

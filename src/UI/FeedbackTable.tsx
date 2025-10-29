@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
@@ -200,6 +200,17 @@ export default function FeedbackDataGrid() {
     pageSize: 10,
   });
 
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const MOBILE_BREAKPOINT = 1024;
+    const handleResize = () =>
+      setIsSmallScreen(window.innerWidth < MOBILE_BREAKPOINT);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <Box sx={{ width: "100%", padding: 3 }}>
       <h2
@@ -237,7 +248,7 @@ export default function FeedbackDataGrid() {
       </Box>
 
       {/* DataGrid */}
-      <Box sx={{ height: 600, width: "100%" }}>
+      <Box sx={{ width: "100%", overflowX: "auto" }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
@@ -246,6 +257,7 @@ export default function FeedbackDataGrid() {
           pageSizeOptions={[5, 10, 25, 50]}
           disableRowSelectionOnClick
           getRowHeight={() => "auto"}
+          autoHeight={isSmallScreen}
           sx={{
             "& .MuiDataGrid-columnHeader": {
               backgroundColor: "#0d47a1",
@@ -271,7 +283,11 @@ export default function FeedbackDataGrid() {
             },
 
             "& .MuiDataGrid-cell": {
-              padding: "16px",
+              padding: "12px",
+            },
+            // allow the grid to scroll horizontally on very small widths
+            ".MuiDataGrid-virtualScroller": {
+              overflowX: "auto",
             },
           }}
         />

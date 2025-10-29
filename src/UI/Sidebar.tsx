@@ -1,16 +1,45 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { RiDashboardLine, RiMessage2Line } from "@remixicon/react";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   isSidebarCollapsed: boolean;
+  setIsSidebarCollapsed?: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ isSidebarCollapsed }:SidebarProps) {
+export function Sidebar({
+  isSidebarCollapsed,
+  setIsSidebarCollapsed,
+}: SidebarProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const MOBILE_BREAKPOINT = 1024;
+    const handleResize = () =>
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   return (
     <div className="flex flex-1 pt-16">
+      {/* overlay for mobile when sidebar is open */}
+      {isMobile && !isSidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-black/30 z-20"
+          onClick={() => setIsSidebarCollapsed?.(true)}
+          aria-hidden
+        />
+      )}
+
       <aside
-        className={`fixed left-0 top-16 bottom-0 bg-white/70 backdrop-blur-xl shadow-xl transition-all duration-300 z-20 border-r border-slate-200/60
-        ${isSidebarCollapsed ? "w-[70px]" : "w-[260px]"}`}
+        className={`fixed left-0 top-16 bottom-0 bg-white/70 backdrop-blur-xl shadow-xl transform transition-all duration-300 z-30 border-r border-slate-200/60
+        ${
+          isMobile && isSidebarCollapsed ? "-translate-x-full" : "translate-x-0"
+        }
+        ${
+          isSidebarCollapsed ? "w-[70px] lg:w-[70px]" : "w-[260px] lg:w-[260px]"
+        }`}
       >
         <nav className="py-8 px-3 h-full flex flex-col">
           {!isSidebarCollapsed && (
@@ -60,8 +89,9 @@ export function Sidebar({ isSidebarCollapsed }:SidebarProps) {
       </aside>
 
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 ease-in-out
-        ${isSidebarCollapsed ? "ml-[70px]" : "ml-[260px]"} pt-6 px-6 pb-6`}
+        className={`flex-1 min-h-screen transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? "lg:ml-[70px]" : "lg:ml-[260px]"
+        } ml-0 pt-6 px-6 pb-6`}
       >
         <div className="max-w-7xl mx-auto">
           <Outlet />
