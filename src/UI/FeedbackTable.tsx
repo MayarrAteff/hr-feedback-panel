@@ -103,14 +103,18 @@ export default function FeedbackDataGrid() {
   const [searchTerm, setSearchTerm] = useState("");
   const [scoreFilter, setScoreFilter] = useState("all");
 
-  // Define columns for DataGrid
   const columns = [
     {
       field: "id",
       headerName: "ID",
-      width: 120,
+      width: 100,
       renderCell: (params: any) => (
-        <span style={{ fontFamily: "monospace", fontSize: "0.875rem" }}>
+        <span
+          style={{
+            fontFamily: "monospace",
+            fontSize: "0.775rem",
+          }}
+        >
           {params.value}
         </span>
       ),
@@ -134,14 +138,24 @@ export default function FeedbackDataGrid() {
       field: "employeeName",
       headerName: "Employee Name",
       width: 180,
-      renderCell: (params: any) => <strong>{params.value}</strong>,
+      renderCell: (params: any) => (
+        <span className="capitalize font-semibold">{params.value}</span>
+      ),
     },
     {
       field: "score",
       headerName: "Score",
       width: 150,
       renderCell: (params: any) => (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Rating value={params.value} readOnly size="small" />
           <Chip
             label={`${params.value}/5`}
@@ -153,7 +167,7 @@ export default function FeedbackDataGrid() {
                 ? "warning"
                 : "error"
             }
-            sx={{ width: "fit-content" }}
+            sx={{ width: "fit-content", fontSize: "0.75rem" }}
           />
         </Box>
       ),
@@ -181,7 +195,6 @@ export default function FeedbackDataGrid() {
     });
   }, [feedbackData, searchTerm, scoreFilter]);
 
-  // New pagination model for MUI v6+ DataGrid
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
@@ -196,14 +209,14 @@ export default function FeedbackDataGrid() {
       </h2>
 
       {/* Search and Filter Bar */}
-      <Box sx={{ marginBottom: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
+      <Box sx={{ marginBottom: 3, display: "flex", gap: 2 }}>
         <TextField
           label="Search"
           variant="outlined"
-          placeholder="Search by name, ID, or notes..."
+          placeholder="Search by Name, ID, or Notes"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ flexGrow: 1, minWidth: "250px" }}
+          sx={{ flexGrow: 1, minWidth: "150px" }}
         />
 
         <FormControl sx={{ minWidth: 150 }}>
@@ -231,10 +244,32 @@ export default function FeedbackDataGrid() {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[5, 10, 25, 50]}
-          checkboxSelection
           disableRowSelectionOnClick
           getRowHeight={() => "auto"}
           sx={{
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#0d47a1",
+              color: "#ffffff",
+              fontWeight: "bold",
+              alignItems: "center",
+            },
+
+            "& .MuiDataGrid-scrollbarFiller": {
+              backgroundColor: "#0d47a1 !important",
+            },
+
+            "& .MuiDataGrid-row:nth-of-type(even)": {
+              backgroundColor: "#e3eaf5",
+            },
+            "& .MuiDataGrid-row:nth-of-type(odd)": {
+              backgroundColor: "#ffffff",
+            },
+
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: "#f3f5f0",
+              cursor: "pointer",
+            },
+
             "& .MuiDataGrid-cell": {
               padding: "16px",
             },
