@@ -1,10 +1,32 @@
+import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
+import { collection, onSnapshot } from "firebase/firestore";
+import db from "../firebase";
 
 export function ScoreChart() {
   const labels = ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"];
+  const [series, setSeries] = useState<number[]>([0, 0, 0, 0, 0]);
 
-  const series = [25, 660, 56, 10, 89];
+  useEffect(() => {
+    const feedbackRef = collection(db, "feedback");
+
+    const unsubscribe = onSnapshot(feedbackRef, (snapshot) => {
+      const scoreCounts = [0, 0, 0, 0, 0]; 
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const score = data.score;
+        if (score >= 1 && score <= 5) {
+          scoreCounts[score - 1]++;
+        }
+      });
+
+      setSeries(scoreCounts);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const chartOptions: ApexOptions = {
     chart: {
@@ -12,10 +34,7 @@ export function ScoreChart() {
       type: "donut",
     },
     labels,
-    colors: ["#00E396", "#FEB019", "#FF4560", "#008FFB", "#ff28cd"].slice(
-      0,
-      labels.length
-    ),
+    colors: ["#00E396", "#FEB019", "#FF4560", "#008FFB", "#ff28cd"],
     plotOptions: {
       pie: {
         startAngle: -90,
