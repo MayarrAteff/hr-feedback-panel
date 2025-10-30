@@ -10,95 +10,51 @@ import {
   Rating,
   Chip,
 } from "@mui/material";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import db from "../firebase";
+
+type Feedback = {
+  id: string;
+  employeeName: string;
+  score: number;
+  notes: string;
+  date: any;
+};
 
 export default function FeedbackDataGrid() {
-  const [feedbackData] = useState([
-    {
-      id: "fb001",
-      date: new Date("2024-10-25T14:30:00"),
-      employeeName: "Jane Doe",
-      score: 5,
-      notes:
-        "Great experience! The new dashboard is very intuitive and easy to use.",
-    },
-    {
-      id: "fb002",
-      date: new Date("2024-10-24T09:15:00"),
-      employeeName: "John Smith",
-      score: 4,
-      notes: "Good overall, but the mobile version needs some improvements.",
-    },
-    {
-      id: "fb003",
-      date: new Date("2024-10-23T16:45:00"),
-      employeeName: "Sarah Johnson",
-      score: 3,
-      notes: "Average experience. Loading times are a bit slow.",
-    },
-    {
-      id: "fb004",
-      date: new Date("2024-10-22T11:20:00"),
-      employeeName: "Mike Brown",
-      score: 5,
-      notes: "Excellent work! All features work perfectly.",
-    },
-    {
-      id: "fb005",
-      date: new Date("2024-10-21T13:00:00"),
-      employeeName: "Emily Davis",
-      score: 2,
-      notes: "Encountered several bugs. Login issues persist.",
-    },
-    {
-      id: "fb006",
-      date: new Date("2024-10-20T10:30:00"),
-      employeeName: "David Wilson",
-      score: 4,
-      notes: "Very good. Would appreciate dark mode support.",
-    },
-    {
-      id: "fb007",
-      date: new Date("2024-10-19T15:10:00"),
-      employeeName: "Lisa Anderson",
-      score: 5,
-      notes: "Perfect! Everything works as expected.",
-    },
-    {
-      id: "fb008",
-      date: new Date("2024-10-18T08:45:00"),
-      employeeName: "Robert Taylor",
-      score: 3,
-      notes: "Decent but could use better documentation.",
-    },
-    {
-      id: "fb009",
-      date: new Date("2024-10-17T14:20:00"),
-      employeeName: "Jennifer Martinez",
-      score: 4,
-      notes: "Good product. Minor UI improvements needed.",
-    },
-    {
-      id: "fb010",
-      date: new Date("2024-10-16T12:00:00"),
-      employeeName: "Chris Lee",
-      score: 1,
-      notes: "Poor experience. Multiple crashes and errors.",
-    },
-    {
-      id: "fb011",
-      date: new Date("2024-10-15T09:30:00"),
-      employeeName: "Amanda White",
-      score: 5,
-      notes: "Outstanding! Best update so far.",
-    },
-    {
-      id: "fb012",
-      date: new Date("2024-10-14T16:15:00"),
-      employeeName: "Daniel Garcia",
-      score: 4,
-      notes: "Very satisfied with the recent changes.",
-    },
-  ]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+
+  useEffect(() => {
+    // Listen in real-time to the `feedback` collection, ordered by date (newest first)
+    const feedbackCollection = collection(db, "feedback");
+    const q = query(feedbackCollection, orderBy("date", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data: Feedback[] = snapshot.docs.map((doc) => {
+          const docData: any = doc.data();
+          return {
+            id: doc.id,
+            employeeName: docData.employeeName,
+            score: docData.score,
+            notes: docData.notes,
+            date: docData.date,
+          };
+        });
+        setFeedbacks(data);
+      },
+      (error) => {
+        console.error(
+          "Realtime listener error for feedback collection:",
+          error
+        );
+      }
+    );
+
+    // Clean up the listener when component unmounts
+    return () => unsubscribe();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [scoreFilter, setScoreFilter] = useState("all");
@@ -107,7 +63,7 @@ export default function FeedbackDataGrid() {
     {
       field: "id",
       headerName: "ID",
-      width: 100,
+      width: 180,
       renderCell: (params: any) => (
         <span
           style={{
@@ -123,15 +79,18 @@ export default function FeedbackDataGrid() {
       field: "date",
       headerName: "Date",
       width: 180,
-      valueGetter: (params: any) => params?.row?.date,
       renderCell: (params: any) => {
-        return new Intl.DateTimeFormat("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(params.value);
+        const timestamp = params.row?.date;
+        const date = timestamp?.toDate?.();
+        return date
+          ? new Intl.DateTimeFormat("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(date)
+          : "—";
       },
     },
     {
@@ -176,13 +135,13 @@ export default function FeedbackDataGrid() {
       field: "notes",
       headerName: "Feedback Notes",
       flex: 1,
-      minWidth: 300,
+      minWidth: 200,
     },
   ];
 
   // Filter data based on search and score filter
   const filteredRows = useMemo(() => {
-    return feedbackData.filter((row) => {
+    return feedbacks.filter((row) => {
       const matchesSearch =
         row.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -193,7 +152,7 @@ export default function FeedbackDataGrid() {
 
       return matchesSearch && matchesScore;
     });
-  }, [feedbackData, searchTerm, scoreFilter]);
+  }, [feedbacks, searchTerm, scoreFilter]);
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -285,7 +244,7 @@ export default function FeedbackDataGrid() {
             "& .MuiDataGrid-cell": {
               padding: "12px",
             },
-            // allow the grid to scroll horizontally on very small widths
+
             ".MuiDataGrid-virtualScroller": {
               overflowX: "auto",
             },

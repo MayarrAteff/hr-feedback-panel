@@ -17,6 +17,7 @@
     "@remixicon/react": "^4.7.0",
     "@tanstack/react-router": "^1.133.32",
     "apexcharts": "^5.3.5",
+    "firebase": "^12.4.0",
     "lucide-react": "^0.548.0",
     "react": "^19.1.1",
     "react-apexcharts": "^1.8.0",
